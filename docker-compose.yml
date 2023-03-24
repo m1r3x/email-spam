@@ -1,0 +1,16 @@
+version: '3'
+services:
+  core_api:
+    build: ./app
+    container_name: "email_spam-api-container"
+    ports:
+      - "8000:15400"
+    volumes:
+      - ./app/:/app
+  url_api:
+    build: ./app2
+    container_name: "email_spam-url-container"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app2/:/app
