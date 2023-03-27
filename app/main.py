@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -22,6 +21,9 @@ tokenizer = Tokenizer(num_words=VOCAB_SIZE, oov_token='<OOV>')
 tokenizer.fit_on_texts(data['message'])
 
 app = FastAPI()
+app = FastAPI(ssl_keyfile="/app/privatekey.pem", ssl_certfile="/app/certificate.pem")
+
+
 model = load_model('/app/model.h5')
 #model = load_model('./model.h5')
 
@@ -50,7 +52,7 @@ def prepare_sentence(sentence):
     return padded
 
 
-@app.get("/")
+@app.post("/")
 async def predict(item: email_spam_detection):
     sentence = prepare_sentence(item.email_content)
     prediction = model.predict(sentence)
@@ -58,9 +60,8 @@ async def predict(item: email_spam_detection):
     result = f'email is spam' if prediction > 0.5 else f'email is not spam'
     is_spam = True if prediction > 0.5 else False
     confidence = float(prediction[0][0])
-    url_data = requests.get('http://localhost:5000/', json={'email_content': item.email_content})
-    url_data = url_data.json()
+#    url_data = requests.get('http://localhost:5000/', json={'email_content': item.email_content})
+#    url_data = url_data.json()
     return {"prediction": result,
             "is_spam": is_spam,
-            "confidence": confidence,
-            "url_data": url_data}
+            "confidence": confidence}
