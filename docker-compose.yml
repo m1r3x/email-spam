@@ -7,10 +7,10 @@ services:
       - "8000:15400"
     volumes:
       - ./app/:/app
-  url_api:
-    build: ./app2
-    container_name: "email_spam-url-container"
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./app2/:/app
+#  url_api:
+#    build: ./app2
+#    container_name: "email_spam-url-container"
+#    ports:
+#      - "5000:5000"
+#    volumes:
+#      - ./app2/:/app
