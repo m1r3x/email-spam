@@ -1,0 +1,5 @@
+fastapi==0.95.0
+pandas==2.0.0
+pydantic==1.10.7
+requests==2.25.1
+tensorflow==2.12.0
