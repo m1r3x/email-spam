@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from tensorflow.keras.models import load_model
@@ -7,6 +7,11 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 import requests
 # from model import tokenizer, MAX_LENGTH, PADDING_TYPE, TRUNC_TYPE
 import pandas as pd
+import jwt
+import datetime
+import os
+
+secret = os.environ.get('SECRET_KEY')
 
 #data = pd.read_csv('/app/final.csv').drop(columns=['Unnamed: 0'])
 data = pd.read_csv('./final.csv').drop(columns=['Unnamed: 0'])
@@ -50,15 +55,29 @@ def prepare_sentence(sentence):
 
     return padded
 
+def checkJWT(token,secret):    
+    try: 
+        return(jwt.decode(token, secret, verify=True, algorithms=["HS256"]))
+    except:
+        return("error")
 
 @app.post("/")
-async def predict(item: email_spam_detection):
-    sentence = prepare_sentence(item.email_content)
-    prediction = model.predict(sentence)
-    print(prediction)
-    result = f'email is spam' if prediction > 0.5 else f'email is not spam'
-    is_spam = True if prediction > 0.5 else False
-    confidence = float(prediction[0][0])
-    return {"prediction": result,
-            "is_spam": is_spam,
-            "confidence": confidence}
+async def predict(item: email_spam_detection, Session: str = Header('')):
+
+    x = checkJWT(Session, secret)
+
+    if x == "error":
+        return {"prediction": "N/A",
+            "is_spam": "N/A",
+            "confidence": "N/A"}
+
+    else: 
+        sentence = prepare_sentence(item.email_content)
+        prediction = model.predict(sentence)
+        print(prediction)
+        result = f'email is spam' if prediction > 0.5 else f'email is not spam'
+        is_spam = True if prediction > 0.5 else False
+        confidence = float(prediction[0][0])
+        return {"prediction": result,
+                "is_spam": is_spam,
+                "confidence": confidence}
